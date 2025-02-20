@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Dziesminieki.MainPage"
+             Title="Dziesminieki">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="♫"
+                     Order="Primary"
+                     Priority="0"
+                     Clicked="OnSettingsButtonClicked" />
+    </ContentPage.ToolbarItems>
+
+    <StackLayout Padding="0">
+        <StackLayout Orientation="Horizontal" HorizontalOptions="Center">
+            <Button Text="LV" Clicked="OnLatvianSongsButtonClicked" />
+            <Button Text="RU" Clicked="OnRussianSongsButtonClicked" />
+        </StackLayout>
+        <SearchBar x:Name="SearchBar"
+                   Placeholder="Meklēt Dziesmu"
+                   SearchButtonPressed="OnSearchButtonPressed"
+                   BackgroundColor="Red"
+                   HeightRequest="40"
+                   Margin="0,0,0,0">
+        </SearchBar>
+        <ListView x:Name="LatvianSongsListView"
+                  ItemTapped="OnSongTapped"
+                  IsVisible="False">
+
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextCell Text="{Binding Key}" Detail="{Binding Value}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <ListView x:Name="RussianSongsListView"
+                  ItemTapped="OnSongTapped"
+                  IsVisible="True">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextCell Text="{Binding Key}" Detail="{Binding Value}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </StackLayout>
+</ContentPage>
