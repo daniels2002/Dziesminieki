@@ -1,12 +1,18 @@
-﻿namespace Dziesminieki
+﻿using PdfSharpCore.Fonts;
+
+namespace Dziesminieki
 {
     public partial class App : Application
     {
         public App()
         {
             InitializeComponent();
+            GlobalFontSettings.FontResolver = FontResolver.Instance;
+        }
 
-            MainPage = new AppShell();
+        protected override Window CreateWindow(IActivationState? activationState)
+        {
+            return new Window(new AppShell());
         }
     }
 }

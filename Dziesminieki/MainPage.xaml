@@ -2,34 +2,56 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Dziesminieki.MainPage"
-             Title="Dziesminieki">
+             BackgroundImageSource="color.jpg"
+             IconImageSource="splash.png">
+
+    <!-- Other UI elements -->
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="♫"
+        <ToolbarItem IconImageSource="arfa1.png"
                      Order="Primary"
-                     Priority="0"
+                     Priority="0" />
+        <ToolbarItem />
+        <ToolbarItem Text="LV"
+                     Order="Primary"
+                     Priority="1"
+                     Clicked="OnLatvianSongsButtonClicked" />
+        <ToolbarItem Text="RU"
+                     Order="Primary"
+                     Priority="2"
+                     Clicked="OnRussianSongsButtonClicked" />
+        <ToolbarItem Text="Iestatījumi"
+                     Order="Secondary"
+                     Priority="2"
                      Clicked="OnSettingsButtonClicked" />
+        <ToolbarItem Text="♥"
+                     Order="Primary"
+                     Priority="2"
+                     Clicked="OnFavoriteSongsButtonClicked" />
     </ContentPage.ToolbarItems>
 
     <StackLayout Padding="0">
-        <StackLayout Orientation="Horizontal" HorizontalOptions="Center">
-            <Button Text="LV" Clicked="OnLatvianSongsButtonClicked" />
-            <Button Text="RU" Clicked="OnRussianSongsButtonClicked" />
-        </StackLayout>
-        <SearchBar x:Name="SearchBar"
-                   Placeholder="Meklēt Dziesmu"
-                   SearchButtonPressed="OnSearchButtonPressed"
-                   BackgroundColor="Red"
-                   HeightRequest="40"
-                   Margin="0,0,0,0">
-        </SearchBar>
+        <Border BackgroundColor="White" StrokeShape="Rectangle" StrokeThickness="0" Padding="0">
+            <SearchBar x:Name="SearchBar"
+                       Placeholder="Meklēt Dziesmu"
+                       SearchButtonPressed="OnSearchButtonPressed"
+                       TextChanged="OnSearchBarTextChanged"
+                       BackgroundColor="Transparent"
+                       HeightRequest="40"
+                       Margin="0,0,0,0">
+            </SearchBar>
+        </Border>
         <ListView x:Name="LatvianSongsListView"
                   ItemTapped="OnSongTapped"
                   IsVisible="False">
-
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <TextCell Text="{Binding Key}" Detail="{Binding Value}" />
+                    <ViewCell>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="{Binding Number}"  Padding="5,0,10,0" />
+                            <Label Text="{Binding Title}" HorizontalTextAlignment="{Binding LyricsAlignment}" />
+                        </StackLayout>
+                    </ViewCell>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
@@ -38,7 +60,28 @@
                   IsVisible="True">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <TextCell Text="{Binding Key}" Detail="{Binding Value}" />
+                    <ViewCell>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="{Binding Number}" Padding="5,0,10,0" />
+                            <Label Text="{Binding Title}" HorizontalTextAlignment="{Binding LyricsAlignment}" />
+                        </StackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <ListView x:Name="FavoriteSongsListView"
+                  ItemTapped="OnSongTapped"
+                  IsVisible="False"
+                  ItemsSource="{Binding FavoriteSongsCollection}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="{Binding Number}" Padding="5,0,10,0" Margin="0,0,0,0" />
+                            <Label Text="{Binding Title}" HorizontalTextAlignment="{Binding LyricsAlignment}" BackgroundColor="Transparent" />
+                            <Button ImageSource="delete.png" Clicked="OnRemoveFavoriteButtonClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" Padding="1,0,1,1" Margin="40,1,0,0" />
+                        </StackLayout>
+                    </ViewCell>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

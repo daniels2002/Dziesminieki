@@ -7,39 +7,81 @@ using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Xml.Serialization;
 
 namespace Dziesminieki
 {
     public partial class MainPage : ContentPage
     {
+        private static MainPage _instance;
         public ObservableCollection<Song> LatvianSongsCollection { get; set; }
         public ObservableCollection<Song> RussianSongsCollection { get; set; }
-        public ObservableCollection<Song> FilteredLatvianSongs { get; set; }
-        public ObservableCollection<Song> FilteredRussianSongs { get; set; }
+        public ObservableCollection<Song> FavoriteSongsCollection { get; set; }
         public Dictionary<int, string> LatvianSongs { get; set; }
         public Dictionary<int, string> RussianSongs { get; set; }
 
         public MainPage()
         {
             InitializeComponent();
+            _instance = this;
 
             LatvianSongsCollection = new ObservableCollection<Song>();
             RussianSongsCollection = new ObservableCollection<Song>();
-            FilteredLatvianSongs = new ObservableCollection<Song>();
-            FilteredRussianSongs = new ObservableCollection<Song>();
+            FavoriteSongsCollection = new ObservableCollection<Song>();
 
             LatvianSongs = new Dictionary<int, string>();
             RussianSongs = new Dictionary<int, string>();
 
+            LoadFavoriteSongs();
+
+            this.BindingContext = this;
+
             ImportSongsFromExcel("Dziesminieki.Resources.Raw.LatvianSongs.xlsx", LatvianSongs, LatvianSongsCollection);
-            LatvianSongsListView.ItemsSource = LatvianSongs.ToList();
+            LatvianSongsListView.ItemsSource = LatvianSongsCollection;
 
             ImportSongsFromExcel("Dziesminieki.Resources.Raw.RussianSongs.xlsx", RussianSongs, RussianSongsCollection);
-            RussianSongsListView.ItemsSource = RussianSongs.ToList();
+            RussianSongsListView.ItemsSource = RussianSongsCollection;
 
-            Console.WriteLine($"Latvian Songs Count: {LatvianSongsCollection.Count}");
-            Console.WriteLine($"Russian Songs Count: {RussianSongsCollection.Count}");
+            //Subscribe to the alignment change message
+            MessagingCenter.Subscribe<SettingsPage, string>(this, "AlignmentChanged", (sender, alignment) =>
+            {
+                TextAlignment textAlignment = TextAlignment.Start;
+
+                switch (alignment)
+                {
+                    case "Center":
+                        textAlignment = TextAlignment.Center;
+
+                        foreach (var song in LatvianSongsCollection)
+                        {
+                            song.LyricsAlignment = textAlignment;
+                        }
+
+                        foreach (var song in RussianSongsCollection)
+                        {
+                            song.LyricsAlignment = textAlignment;
+                        }
+                        break;
+
+                    case "Right":
+                        textAlignment = TextAlignment.End;
+
+                        foreach (var song in LatvianSongsCollection)
+                        {
+                            song.LyricsAlignment = textAlignment;
+                        }
+
+                        foreach (var song in RussianSongsCollection)
+                        {
+                            song.LyricsAlignment = textAlignment;
+                        }
+                        break;
+                }
+            });
         }
+
+        public static MainPage Instance => _instance;
 
         private async void OnSettingsButtonClicked(object sender, EventArgs e)
         {
@@ -48,23 +90,9 @@ namespace Dziesminieki
 
         private async void OnSongTapped(object sender, ItemTappedEventArgs e)
         {
-            if (e.Item is KeyValuePair<int, string> selectedSong)
+            if (e.Item is Song selectedSong)
             {
-                Song song = null;
-
-                if (LatvianSongsListView.IsVisible)
-                {
-                    song = LatvianSongsCollection.FirstOrDefault(s => s.Number == selectedSong.Key);
-                }
-                else if (RussianSongsListView.IsVisible)
-                {
-                    song = RussianSongsCollection.FirstOrDefault(s => s.Number == selectedSong.Key);
-                }
-
-                if (song != null)
-                {
-                    await Navigation.PushAsync(new SongDetailPage(song));
-                }
+                await Navigation.PushAsync(new SongDetailPage(selectedSong));
             }
         }
 
@@ -109,6 +137,21 @@ namespace Dziesminieki
             }
         }
 
+        private void OnSearchBarTextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(e.NewTextValue))
+            {
+                if (LatvianSongsListView.IsVisible)
+                {
+                    LatvianSongsListView.ItemsSource = LatvianSongsCollection;
+                }
+                else if (RussianSongsListView.IsVisible)
+                {
+                    RussianSongsListView.ItemsSource = RussianSongsCollection;
+                }
+            }
+        }
+
         private void OnSearchButtonPressed(object sender, EventArgs e)
         {
             var searchBar = sender as SearchBar;
@@ -119,48 +162,26 @@ namespace Dziesminieki
             {
                 if (LatvianSongsListView.IsVisible)
                 {
-                    FilteredLatvianSongs.Clear();
-                    foreach (var song in LatvianSongsCollection)
-                    {
-                        FilteredLatvianSongs.Add(song);
-                    }
-                    LatvianSongsListView.ItemsSource = FilteredLatvianSongs;
+                    LatvianSongsListView.ItemsSource = LatvianSongsCollection;
                 }
                 else if (RussianSongsListView.IsVisible)
                 {
-                    FilteredRussianSongs.Clear();
-                    foreach (var song in RussianSongsCollection)
-                    {
-                        FilteredRussianSongs.Add(song);
-                    }
-                    RussianSongsListView.ItemsSource = FilteredRussianSongs;
+                    RussianSongsListView.ItemsSource = RussianSongsCollection;
                 }
                 return;
             }
 
             var filteredSongs = (LatvianSongsListView.IsVisible ? LatvianSongsCollection : RussianSongsCollection)
-                .Where(s =>
-                    (s.Title?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0) ||
-                    (s.Number.HasValue && s.Number.Value.ToString().IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0)
-                ).ToList();
+                .Where(s => s.Lyrics != null && s.Lyrics.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0)
+                .ToList();
 
             if (LatvianSongsListView.IsVisible)
             {
-                FilteredLatvianSongs.Clear();
-                foreach (var song in filteredSongs)
-                {
-                    FilteredLatvianSongs.Add(song);
-                }
-                LatvianSongsListView.ItemsSource = FilteredLatvianSongs;
+                LatvianSongsListView.ItemsSource = filteredSongs;
             }
             else if (RussianSongsListView.IsVisible)
             {
-                FilteredRussianSongs.Clear();
-                foreach (var song in filteredSongs)
-                {
-                    FilteredRussianSongs.Add(song);
-                }
-                RussianSongsListView.ItemsSource = FilteredRussianSongs;
+                RussianSongsListView.ItemsSource = filteredSongs;
             }
         }
 
@@ -168,22 +189,92 @@ namespace Dziesminieki
         {
             LatvianSongsListView.IsVisible = true;
             RussianSongsListView.IsVisible = false;
+            FavoriteSongsListView.IsVisible = false;
+            SearchBar.Placeholder = "Meklēt dziesmu";
         }
 
         private void OnRussianSongsButtonClicked(object sender, EventArgs e)
         {
             LatvianSongsListView.IsVisible = false;
             RussianSongsListView.IsVisible = true;
+            FavoriteSongsListView.IsVisible = false;
+            SearchBar.Placeholder = "Поиск песни";
+        }
+
+        private void OnFavoriteSongsButtonClicked(object sender, EventArgs e)
+        {
+            LatvianSongsListView.IsVisible = false;
+            RussianSongsListView.IsVisible = false;
+            FavoriteSongsListView.IsVisible = true;
+            SearchBar.Placeholder = "";
+        }
+
+        private void OnFavoriteButtonClicked(object sender, EventArgs e)
+        {
+            var button = sender as Button;
+            if (button == null) return;
+
+            if (button.CommandParameter is Song song)
+            {
+                if (FavoriteSongsCollection.Contains(song))
+                {
+                    FavoriteSongsCollection.Remove(song);
+                }
+                else
+                {
+                    FavoriteSongsCollection.Add(song);
+                }
+
+                SaveFavoriteSongs();
+            }
+            else
+            {
+                Console.WriteLine("Error: CommandParameter is not a valid Song.");
+            }
+        }
+
+        private void OnRemoveFavoriteButtonClicked(object sender, EventArgs e)
+        {
+            var button = sender as Button;
+            if (button == null) return;
+
+            if (button.CommandParameter is Song song)
+            {
+                if (FavoriteSongsCollection.Contains(song))
+                {
+                    FavoriteSongsCollection.Remove(song);
+                    SaveFavoriteSongs();
+                }
+            }
+        }
+
+        public void SaveFavoriteSongs()
+        {
+            var favoriteSongsJson = JsonSerializer.Serialize(FavoriteSongsCollection);
+            Preferences.Set("FavoriteSongs", favoriteSongsJson);
+        }
+
+        public void LoadFavoriteSongs()
+        {
+            var favoriteSongsJson = Preferences.Get("FavoriteSongs", string.Empty);
+            if (!string.IsNullOrEmpty(favoriteSongsJson))
+            {
+                var favoriteSongs = JsonSerializer.Deserialize<ObservableCollection<Song>>(favoriteSongsJson);
+                if (favoriteSongs != null)
+                {
+                    FavoriteSongsCollection = favoriteSongs;
+                }
+            }
         }
     }
 
+    [Serializable]
     public class Song
     {
         public int? Number { get; set; }
         public string? Title { get; set; }
         public string? Lyrics { get; set; }
-        public string? Author { get; set; }
-        public string? PlaceInBible { get; set; }
+        public TextAlignment LyricsAlignment { get; set; }
 
         public string DisplayText => $"{Number} {Title}";
     }
