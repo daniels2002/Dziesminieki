@@ -3,17 +3,44 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Dziesminieki.SettingsPage"
              Title="Iestatījumi">
+    <ScrollView>
+        <StackLayout Padding="0,20,0,0">
 
-    <StackLayout Padding="10">
-        <Label Text="Līdzinājums" HorizontalOptions="Center" Margin="10" />
-        <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Spacing="10">
-            <Button  x:Name="LeftAlignment" ImageSource="left.png" Clicked="LeftAlignment_Clicked" WidthRequest="70" HeightRequest="70" />
-            <Button  x:Name="CenterAlignment" ImageSource="center.png" Clicked="CenterAlignment_Clicked" WidthRequest="70" HeightRequest="70" />
-            <Button  x:Name="RightAlignment" ImageSource="right.png" Clicked="RightAlignment_Clicked" WidthRequest="70" HeightRequest="70" />
+            <Label Text="Līdzinājums" HorizontalOptions="Center" Margin="10" />
+            <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Spacing="10">
+                <Button x:Name="LeftAlignment" ImageSource="left.png" Clicked="LeftAlignment_Clicked" WidthRequest="70" HeightRequest="70" />
+                <Button x:Name="CenterAlignment" ImageSource="center.png" Clicked="CenterAlignment_Clicked" WidthRequest="70" HeightRequest="70" />
+                <Button x:Name="RightAlignment" ImageSource="right.png" Clicked="RightAlignment_Clicked" WidthRequest="70" HeightRequest="70" />
+            </StackLayout>
+
+            <Label Text="Fonta izmērs dziesmu tekstam" HorizontalOptions="Center" Margin="15" />
+            <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Spacing="10">
+                <Label Text="10" VerticalOptions="Center" />
+                <Slider x:Name="LyricsSizeSlider" Minimum="10" Maximum="30" ValueChanged="LyricsSizeSlider_ValueChanged"
+                    WidthRequest="200" ThumbColor="Gray" MinimumTrackColor="IndianRed" MaximumTrackColor="Gray" />
+                <Label Text="30" VerticalOptions="Center" />
+            </StackLayout>
+
+            <Label Text="Fonta izmērs nosaukumam" HorizontalOptions="Center" Margin="10" />
+            <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Spacing="10">
+                <Label Text="10" VerticalOptions="Center" />
+                <Slider x:Name="TitleSizeSlider" Minimum="10" Maximum="30" ValueChanged="TitleSizeSlider_ValueChanged"
+                    WidthRequest="200" ThumbColor="Gray" MinimumTrackColor="IndianRed" MaximumTrackColor="Gray" />
+                <Label Text="30" VerticalOptions="Center" />
+            </StackLayout>
+
+            <Button Text="Pievienot Dziesmu" Clicked="OnAddSongButtonClicked" HorizontalOptions="Center" Margin="20" />
+
+            <Entry x:Name="SongNumberEntry" Placeholder="Ievadi dziesmas numuru" Keyboard="Numeric" />
+            <Picker x:Name="LanguagePicker" Title="Izvēlies valodu">
+                <Picker.ItemsSource>
+                    <x:Array Type="{x:Type x:String}">
+                        <x:String>Latvian</x:String>
+                        <x:String>Russian</x:String>
+                    </x:Array>
+                </Picker.ItemsSource>
+            </Picker>
+            <Button Text="Noņemt dziesmu" Clicked="OnRemoveSongButtonClicked" HorizontalOptions="Center" Margin="20" />
         </StackLayout>
-        <Label Text="Fonta izmērs dziesmu tekstam" HorizontalOptions="Center" Margin="15" />
-        <Slider x:Name="LyricsSizeSlider" Minimum="10" Maximum="30" ValueChanged="LyricsSizeSlider1_ValueChanged" />
-        <Label Text="Fonta izmērs nosaukumam" HorizontalOptions="Center" Margin="10" />
-        <Slider x:Name="TitleSizeSlider" Minimum="10" Maximum="30" ValueChanged="TitleSizeSlider_ValueChanged" />
-    </StackLayout>
+    </ScrollView>
 </ContentPage>

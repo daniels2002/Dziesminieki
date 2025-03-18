@@ -5,23 +5,47 @@
              x:Class="Dziesminieki.SongDetailPage">
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="≡"
-                     Order="Primary"
-                     Priority="2"
-                     Clicked="OnSettingsButtonClicked" />
-        <ToolbarItem Text="♥"
-              Order="Primary"
-              Priority="1"
-              Clicked="OnFavoriteSongsButtonClicked" />
-        <ToolbarItem IconImageSource="share.png"
-              Order="Primary"
-              Priority="0"
-              Clicked="OnShareSongButtonClicked" />
+        <ToolbarItem
+            Text="♥  Patīk "
+            Order="Secondary"
+            Clicked="OnFavoriteSongsButtonClicked" />
+        <ToolbarItem
+            Text="🔗 Dalīties"
+            Order="Secondary"
+            Clicked="OnShareSongButtonClicked" />
+        <ToolbarItem
+            Text="☰   Iestatījumi"
+            Order="Secondary"
+            Clicked="OnSettingsButtonClicked" />
+        <ToolbarItem
+            Text="+"
+            Order="Primary"
+            x:Name="PickAudio"
+            Clicked="OnPickAudioButtonClicked" />
+        <ToolbarItem
+            Text="▶"
+            Order="Primary"
+            x:Name="PlayAudio"
+            Clicked="OnPlayAudioButtonClicked" />
     </ContentPage.ToolbarItems>
 
-    <Grid Padding="10">
-        <ScrollView VerticalOptions="Fill">
-            <Label x:Name="SongLyricsLabel" FontSize="18" HorizontalOptions="Center" VerticalOptions="Start" />
-        </ScrollView>
-    </Grid>
+    <ScrollView>
+        <Grid Padding="10">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <toolkit:MediaElement x:Name="AudioPlayer" ShouldAutoPlay="False"  Grid.Row="2" IsVisible="False" />
+
+            <Label x:Name="SongLyricsLabel">
+                <Label.GestureRecognizers>
+                    <SwipeGestureRecognizer Direction="Left" Swiped="OnSwipedLeft" />
+                    <SwipeGestureRecognizer Direction="Right" Swiped="OnSwipedRight" />
+                    <PinchGestureRecognizer PinchUpdated="OnPinchUpdated" />
+                </Label.GestureRecognizers>
+            </Label>
+        </Grid>
+    </ScrollView>
 </ContentPage>

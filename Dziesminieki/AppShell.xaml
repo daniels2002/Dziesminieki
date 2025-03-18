@@ -22,4 +22,8 @@
         Title="Settings"
         ContentTemplate="{DataTemplate local:SettingsPage}"
         Route="SettingsPage" />
+    <ShellContent
+        Title="Add Song"
+        ContentTemplate="{DataTemplate local:AddSongPage}"
+        Route="AddSongPage" />
 </Shell>

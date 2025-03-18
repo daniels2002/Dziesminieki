@@ -31,12 +31,12 @@
     </ContentPage.ToolbarItems>
 
     <StackLayout Padding="0">
-        <Border BackgroundColor="White" StrokeShape="Rectangle" StrokeThickness="0" Padding="0">
+        <Border BackgroundColor="#998B8E" StrokeShape="Rectangle" StrokeThickness="0" Padding="0">
             <SearchBar x:Name="SearchBar"
                        Placeholder="Meklēt Dziesmu"
                        SearchButtonPressed="OnSearchButtonPressed"
                        TextChanged="OnSearchBarTextChanged"
-                       BackgroundColor="Transparent"
+                       BackgroundColor="#998B8E"
                        HeightRequest="40"
                        Margin="0,0,0,0">
             </SearchBar>
@@ -46,11 +46,16 @@
                   IsVisible="False">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <ViewCell>
-                        <StackLayout Orientation="Horizontal">
-                            <Label Text="{Binding Number}"  Padding="5,0,10,0" />
-                            <Label Text="{Binding Title}" HorizontalTextAlignment="{Binding LyricsAlignment}" />
-                        </StackLayout>
+                    <ViewCell  Tapped="OnViewCellTapped">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Label Text="{Binding Number}"  Padding="5,0,10,0" Grid.Column="0" />
+                            <Label Text="{Binding Title}"  HorizontalTextAlignment="{Binding LyricsAlignment}" FontSize="{Binding TitleFontSize}" Grid.Column="1" />
+                        </Grid>
                     </ViewCell>
                 </DataTemplate>
             </ListView.ItemTemplate>
@@ -60,11 +65,16 @@
                   IsVisible="True">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <ViewCell>
-                        <StackLayout Orientation="Horizontal">
-                            <Label Text="{Binding Number}" Padding="5,0,10,0" />
-                            <Label Text="{Binding Title}" HorizontalTextAlignment="{Binding LyricsAlignment}" />
-                        </StackLayout>
+                    <ViewCell  Tapped="OnViewCellTapped">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Label Text="{Binding Number}" Padding="5,0,10,0" Grid.Column="0" />
+                            <Label Text="{Binding Title}"  HorizontalTextAlignment="{Binding LyricsAlignment}" FontSize="{Binding TitleFontSize}" Grid.Column="1" LineBreakMode="WordWrap" />
+                        </Grid>
                     </ViewCell>
                 </DataTemplate>
             </ListView.ItemTemplate>
@@ -75,12 +85,17 @@
                   ItemsSource="{Binding FavoriteSongsCollection}">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <ViewCell>
-                        <StackLayout Orientation="Horizontal">
-                            <Label Text="{Binding Number}" Padding="5,0,10,0" Margin="0,0,0,0" />
-                            <Label Text="{Binding Title}" HorizontalTextAlignment="{Binding LyricsAlignment}" BackgroundColor="Transparent" />
-                            <Button ImageSource="delete.png" Clicked="OnRemoveFavoriteButtonClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" Padding="1,0,1,1" Margin="40,1,0,0" />
-                        </StackLayout>
+                    <ViewCell  Tapped="OnViewCellTapped">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Label Text="{Binding Number}" Padding="5,0,10,0" Margin="0,0,0,0" Grid.Column="0" />
+                            <Label Text="{Binding Title}" HorizontalTextAlignment="{Binding LyricsAlignment}" BackgroundColor="Transparent" Grid.Column="1" />
+                            <Button ImageSource="delete.png" Clicked="OnRemoveFavoriteButtonClicked" CommandParameter="{Binding .}" BackgroundColor="Transparent" Padding="1,0,1,1" Margin="40,1,0,0" Grid.Column="2" />
+                        </Grid>
                     </ViewCell>
                 </DataTemplate>
             </ListView.ItemTemplate>

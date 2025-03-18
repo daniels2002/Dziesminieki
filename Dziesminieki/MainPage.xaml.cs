@@ -1,6 +1,4 @@
-﻿using CsvHelper;
-using CsvHelper.Configuration;
-using ExcelDataReader;
+﻿using ExcelDataReader;
 using Microsoft.Maui.Controls;
 using System.Collections.ObjectModel;
 using System.Data;
@@ -9,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Xml.Serialization;
+using CommunityToolkit.Mvvm.Messaging.Messages;
+using System.ComponentModel.DataAnnotations;
 
 namespace Dziesminieki
 {
@@ -26,8 +26,12 @@ namespace Dziesminieki
             InitializeComponent();
             _instance = this;
 
-            LatvianSongsCollection = new ObservableCollection<Song>();
-            RussianSongsCollection = new ObservableCollection<Song>();
+            //LatvianSongsCollection = new ObservableCollection<Song>();
+            //RussianSongsCollection = new ObservableCollection<Song>();
+            //FavoriteSongsCollection = new ObservableCollection<Song>();
+
+            LatvianSongsCollection = LoadSongs("LatvianSongs");
+            RussianSongsCollection = LoadSongs("RussianSongs");
             FavoriteSongsCollection = new ObservableCollection<Song>();
 
             LatvianSongs = new Dictionary<int, string>();
@@ -37,47 +41,31 @@ namespace Dziesminieki
 
             this.BindingContext = this;
 
-            ImportSongsFromExcel("Dziesminieki.Resources.Raw.LatvianSongs.xlsx", LatvianSongs, LatvianSongsCollection);
+            double titleFontSize = Preferences.Get("TitleFontSize", 13.0);
+
+            ImportSongsFromExcel("Dziesminieki.Resources.Raw.LatvianSongs.xlsx", LatvianSongs, LatvianSongsCollection, titleFontSize);
             LatvianSongsListView.ItemsSource = LatvianSongsCollection;
 
-            ImportSongsFromExcel("Dziesminieki.Resources.Raw.RussianSongs.xlsx", RussianSongs, RussianSongsCollection);
+            ImportSongsFromExcel("Dziesminieki.Resources.Raw.RussianSongs.xlsx", RussianSongs, RussianSongsCollection, titleFontSize);
             RussianSongsListView.ItemsSource = RussianSongsCollection;
 
-            //Subscribe to the alignment change message
-            MessagingCenter.Subscribe<SettingsPage, string>(this, "AlignmentChanged", (sender, alignment) =>
+            MessagingCenter.Subscribe<SettingsPage, double>(this, "TitleFontSizeChanged", (sender, fontSize) =>
             {
-                TextAlignment textAlignment = TextAlignment.Start;
-
-                switch (alignment)
+                foreach (var song in LatvianSongsCollection)
                 {
-                    case "Center":
-                        textAlignment = TextAlignment.Center;
-
-                        foreach (var song in LatvianSongsCollection)
-                        {
-                            song.LyricsAlignment = textAlignment;
-                        }
-
-                        foreach (var song in RussianSongsCollection)
-                        {
-                            song.LyricsAlignment = textAlignment;
-                        }
-                        break;
-
-                    case "Right":
-                        textAlignment = TextAlignment.End;
-
-                        foreach (var song in LatvianSongsCollection)
-                        {
-                            song.LyricsAlignment = textAlignment;
-                        }
-
-                        foreach (var song in RussianSongsCollection)
-                        {
-                            song.LyricsAlignment = textAlignment;
-                        }
-                        break;
+                    song.TitleFontSize = fontSize;
                 }
+
+                foreach (var song in RussianSongsCollection)
+                {
+                    song.TitleFontSize = fontSize;
+                }
+
+                LatvianSongsListView.ItemsSource = null;
+                LatvianSongsListView.ItemsSource = LatvianSongsCollection;
+
+                RussianSongsListView.ItemsSource = null;
+                RussianSongsListView.ItemsSource = RussianSongsCollection;
             });
         }
 
@@ -96,7 +84,12 @@ namespace Dziesminieki
             }
         }
 
-        private void ImportSongsFromExcel(string filePath, Dictionary<int, string> songDictionary, ObservableCollection<Song> songCollection)
+        private async void OnAddSongButtonClicked(object sender, EventArgs e)
+        {
+            await Navigation.PushAsync(new AddSongPage());
+        }
+
+        private void ImportSongsFromExcel(string filePath, Dictionary<int, string> songDictionary, ObservableCollection<Song> songCollection, double titleFontSize)
         {
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
             var resourceName = filePath;
@@ -105,7 +98,6 @@ namespace Dziesminieki
             {
                 if (stream == null)
                 {
-                    // Handle the case where the resource is not found
                     Console.WriteLine("Error: Embedded resource not found!");
                     return;
                 }
@@ -127,7 +119,8 @@ namespace Dziesminieki
                         {
                             Number = number,
                             Title = title,
-                            Lyrics = lyrics
+                            Lyrics = lyrics,
+                            TitleFontSize = titleFontSize
                         };
 
                         songCollection.Add(song);
@@ -149,6 +142,22 @@ namespace Dziesminieki
                 {
                     RussianSongsListView.ItemsSource = RussianSongsCollection;
                 }
+                return;
+            }
+
+            var searchText = e.NewTextValue;
+            var filteredSongs = (LatvianSongsListView.IsVisible ? LatvianSongsCollection : RussianSongsCollection)
+                .Where(s => (s.Lyrics != null && s.Lyrics.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                            (s.Number != null && s.Number.ToString().IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0))
+                .ToList();
+
+            if (LatvianSongsListView.IsVisible)
+            {
+                LatvianSongsListView.ItemsSource = filteredSongs;
+            }
+            else if (RussianSongsListView.IsVisible)
+            {
+                RussianSongsListView.ItemsSource = filteredSongs;
             }
         }
 
@@ -168,11 +177,13 @@ namespace Dziesminieki
                 {
                     RussianSongsListView.ItemsSource = RussianSongsCollection;
                 }
+
                 return;
             }
 
             var filteredSongs = (LatvianSongsListView.IsVisible ? LatvianSongsCollection : RussianSongsCollection)
-                .Where(s => s.Lyrics != null && s.Lyrics.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0)
+                .Where(s => (s.Lyrics != null && s.Lyrics.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                            (s.Number != null && s.Number.ToString().IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0))
                 .ToList();
 
             if (LatvianSongsListView.IsVisible)
@@ -206,7 +217,7 @@ namespace Dziesminieki
             LatvianSongsListView.IsVisible = false;
             RussianSongsListView.IsVisible = false;
             FavoriteSongsListView.IsVisible = true;
-            SearchBar.Placeholder = "";
+            SearchBar.Placeholder = "Meklē mīļāko dziesmu";
         }
 
         private void OnFavoriteButtonClicked(object sender, EventArgs e)
@@ -266,6 +277,34 @@ namespace Dziesminieki
                 }
             }
         }
+
+        private ObservableCollection<Song> LoadSongs(string key)
+        {
+            var songsJson = Preferences.Get(key, string.Empty);
+            if (!string.IsNullOrEmpty(songsJson))
+            {
+                var songs = JsonSerializer.Deserialize<ObservableCollection<Song>>(songsJson);
+                if (songs != null)
+                {
+                    return songs;
+                }
+            }
+            return new ObservableCollection<Song>();
+        }
+
+        private async void OnViewCellTapped(object sender, EventArgs e)
+        {
+            var viewCell = sender as ViewCell;
+            if (viewCell != null)
+            {
+                var originalColor = Color.FromArgb("79303F");
+                viewCell.View.BackgroundColor = Color.FromArgb("632431");
+
+                await Task.Delay(200);
+
+                viewCell.View.BackgroundColor = originalColor;
+            }
+        }
     }
 
     [Serializable]
@@ -275,6 +314,7 @@ namespace Dziesminieki
         public string? Title { get; set; }
         public string? Lyrics { get; set; }
         public TextAlignment LyricsAlignment { get; set; }
+        public double TitleFontSize { get; set; }
 
         public string DisplayText => $"{Number} {Title}";
     }

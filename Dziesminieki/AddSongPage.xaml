@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Dziesminieki.AddSongPage"
+             Title="">
+    <StackLayout Padding="10">
+        <Label Text="Pievienot Dziesmu" FontSize="24" HorizontalOptions="Center" />
+
+        <Entry x:Name="SongNumberEntry" Placeholder="Numurs" Keyboard="Numeric" />
+        <Entry x:Name="SongTitleEntry" Placeholder="Virsraksts" />
+        <Editor x:Name="SongLyricsEditor" Placeholder="Dziesmas Teksts" HeightRequest="200" />
+
+        <Picker x:Name="LanguagePicker" Title="Izvēlies valodu">
+            <Picker.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>Latvian</x:String>
+                    <x:String>Russian</x:String>
+                </x:Array>
+            </Picker.ItemsSource>
+        </Picker>
+
+        <Button Text="Pievienot dziesmu" Clicked="OnAddSongButtonClicked" />
+    </StackLayout>
+</ContentPage>
