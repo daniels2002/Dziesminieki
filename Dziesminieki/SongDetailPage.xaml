@@ -6,15 +6,20 @@
 
     <ContentPage.ToolbarItems>
         <ToolbarItem
-            Text="♥  Patīk "
+            Text=" ♥  Patīk "
             Order="Secondary"
             Clicked="OnFavoriteSongsButtonClicked" />
         <ToolbarItem
-            Text="🔗 Dalīties"
+            Text=" 🔗 Dalīties"
             Order="Secondary"
             Clicked="OnShareSongButtonClicked" />
         <ToolbarItem
-            Text="☰   Iestatījumi"
+             Text="🌐 Meklēt Youtube"
+             Order="Secondary"
+             x:Name="YoutubeSearch"
+             Clicked="OnSearchYoutubeButtonClicked" />
+        <ToolbarItem
+            Text=" ☰   Iestatījumi"
             Order="Secondary"
             Clicked="OnSettingsButtonClicked" />
         <ToolbarItem
@@ -22,11 +27,13 @@
             Order="Primary"
             x:Name="PickAudio"
             Clicked="OnPickAudioButtonClicked" />
+        
         <ToolbarItem
             Text="▶"
             Order="Primary"
             x:Name="PlayAudio"
             Clicked="OnPlayAudioButtonClicked" />
+       
     </ContentPage.ToolbarItems>
 
     <ScrollView>

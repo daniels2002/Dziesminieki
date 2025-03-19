@@ -149,6 +149,7 @@ namespace Dziesminieki
             var filteredSongs = (LatvianSongsListView.IsVisible ? LatvianSongsCollection : RussianSongsCollection)
                 .Where(s => (s.Lyrics != null && s.Lyrics.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0) ||
                             (s.Number != null && s.Number.ToString().IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0))
+                .DistinctBy(s => s.Number)
                 .ToList();
 
             if (LatvianSongsListView.IsVisible)
@@ -184,6 +185,7 @@ namespace Dziesminieki
             var filteredSongs = (LatvianSongsListView.IsVisible ? LatvianSongsCollection : RussianSongsCollection)
                 .Where(s => (s.Lyrics != null && s.Lyrics.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0) ||
                             (s.Number != null && s.Number.ToString().IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0))
+                .DistinctBy(s => s.Number)
                 .ToList();
 
             if (LatvianSongsListView.IsVisible)

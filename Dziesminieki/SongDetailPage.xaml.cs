@@ -277,6 +277,16 @@ namespace Dziesminieki
                 Console.WriteLine($"Error sharing song: {ex.Message}");
             }
         }
+
+        private async void OnSearchYoutubeButtonClicked(object sender, EventArgs e)
+        {
+            var songTitle = _currentSong.Title;
+            if (!string.IsNullOrEmpty(songTitle))
+            {
+                var youtubeSearchUrl = $"https://www.youtube.com/results?search_query={Uri.EscapeDataString(songTitle)}";
+                await Launcher.OpenAsync(new Uri(youtubeSearchUrl));
+            }
+        }
     }
 
     public class FontResolver : IFontResolver
